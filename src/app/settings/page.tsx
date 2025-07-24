@@ -50,7 +50,8 @@ function Section({ children, title, description }: SectionProps) {
 type UpdaterStatus =
   | "Checking for updates..."
   | "Downloading update..."
-  | "Restarting...";
+  | "Restarting..."
+  | "Something went wrong.";
 
 export default function Settings() {
   const [config, setConfig] = useState<Config | null>(null);
@@ -84,6 +85,8 @@ export default function Settings() {
       setDisplayDialog(false);
     } else if (displayNumberDialog) {
       setDisplayNumberDialog(false);
+    } else if (displayUpdater) {
+      setDisplayUpdater(false);
     } else {
       router.back();
     }
@@ -91,7 +94,9 @@ export default function Settings() {
 
   function UpdaterSection() {
     function checkUpdate() {
-      const update = check()
+      setUpdaterStatus("Checking for updates...");
+      setUpdaterDescription("Please wait while we connect to GitHub.");
+      const update = check({ timeout: 3000 })
         .then((update) => {
           if (update) {
             let downloaded: number = 0;
@@ -104,13 +109,13 @@ export default function Settings() {
                     setUpdaterStatus("Downloading update...");
                     contentLength = event.data.contentLength!;
                     setUpdaterDescription(
-                      `0% downloaded. (0 of ${contentLength})`,
+                      `Downloading ${update.version}... (0%)`,
                     );
                     break;
                   case "Progress":
                     downloaded += event.data.chunkLength;
                     setUpdaterDescription(
-                      `${(downloaded / contentLength) * 100}% downloaded. (${downloaded} of ${contentLength})`,
+                      `Downloading ${update.version} (${(downloaded / contentLength) * 100}%).`,
                     );
                     break;
                   case "Finished":
@@ -128,6 +133,16 @@ export default function Settings() {
           }
         })
         .catch((e) => {
+          if (e.includes("error sending request")) {
+            setUpdaterStatus("Something went wrong.");
+            setUpdaterDescription(
+              "Could not connect to GitHub. Is your device connected to the Internet?",
+            );
+          } else if (e.includes("Could not fetch a valid release")) {
+            setUpdaterStatus("Something went wrong.");
+            setUpdaterDescription("Please try again later.");
+          }
+
           throw e;
         });
     }
@@ -146,6 +161,7 @@ export default function Settings() {
               onClick={() => {
                 if (!updateButtonDisabled) {
                   setDisplayUpdater(true);
+                  checkUpdate();
                 }
               }}
             ></Button>
