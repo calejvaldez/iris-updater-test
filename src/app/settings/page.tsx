@@ -13,7 +13,6 @@ import Dialog from "@/components/Dialog";
 import { invoke } from "@tauri-apps/api/core";
 import useKeyPress from "@/components/useKeyPress";
 import { useRouter } from "next/navigation";
-import ConfirmUpdateDialog from "./_components/ConfirmUpdateDialog";
 import Layout from "@/components/Layout";
 import { check } from "@tauri-apps/plugin-updater";
 
