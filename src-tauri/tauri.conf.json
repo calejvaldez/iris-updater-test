@@ -44,13 +44,13 @@
     }
   },
   "productName": "Iris",
-  "version": "0.1.3",
-  "identifier": "org.ojosproject.Iris",
+  "version": "0.1.2",
+  "identifier": "org.calejvaldez.Iris",
   "plugins": {
     "updater": {
-      "pubkey": "dW50cnVzdGVkIGNvbW1lbnQ6IG1pbmlzaWduIHB1YmxpYyBrZXk6IDNEMTlGOUU3OUUyNzBENjgKUldSb0RTZWU1L2taUFN3WlltNFhTb1pUSXl1dWdjK2VGak9lcGVnUXdQcEN3cGRJMjZYQVVBaUQK",
+      "pubkey": "dW50cnVzdGVkIGNvbW1lbnQ6IG1pbmlzaWduIHB1YmxpYyBrZXk6IEEwRjA0RDYyOEIwQkE5QUQKUldTdHFRdUxZazN3b0FjV0xTNlI0VmdBUGhnMVBqMUJWYVRvSEpGTnB1aFQwMUxJcGdmVy9GOGEK",
       "endpoints": [
-        "https://github.com/ojosproject/iris/releases/latest/download/latest.json"
+        "https://github.com/calejvaldez/iris-updater-test/releases/latest/download/latest.json"
       ]
     }
   },
