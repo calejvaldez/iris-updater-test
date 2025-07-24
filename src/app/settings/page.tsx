@@ -15,6 +15,7 @@ import useKeyPress from "@/components/useKeyPress";
 import { useRouter } from "next/navigation";
 import ConfirmUpdateDialog from "./_components/ConfirmUpdateDialog";
 import Layout from "@/components/Layout";
+import { check } from "@tauri-apps/plugin-updater";
 
 type RowProps = {
   children: ReactElement;
@@ -46,6 +47,11 @@ function Section({ children, title, description }: SectionProps) {
   );
 }
 
+type UpdaterStatus =
+  | "Checking for updates..."
+  | "Downloading update..."
+  | "Restarting...";
+
 export default function Settings() {
   const [config, setConfig] = useState<Config | null>(null);
   const [displayDialog, setDisplayDialog] = useState(false);
@@ -60,6 +66,12 @@ export default function Settings() {
   const [updateButtonLabel, setUpdateButtonLabel] = useState("Request");
   const [updateButtonDisabled, setUpdateButtonDisabled] = useState(false);
   const router = useRouter();
+  const [updaterStatus, setUpdaterStatus] = useState<UpdaterStatus>(
+    "Checking for updates...",
+  );
+  const [updaterDescription, setUpdaterDescription] = useState(
+    "Please wait while we connect to GitHub.",
+  );
 
   useEffect(() => {
     invoke<Config>("get_config").then((c) => {
@@ -78,6 +90,48 @@ export default function Settings() {
   });
 
   function UpdaterSection() {
+    function checkUpdate() {
+      const update = check()
+        .then((update) => {
+          if (update) {
+            let downloaded: number = 0;
+            let contentLength: number = 0;
+
+            update
+              .downloadAndInstall((event) => {
+                switch (event.event) {
+                  case "Started":
+                    setUpdaterStatus("Downloading update...");
+                    contentLength = event.data.contentLength!;
+                    setUpdaterDescription(
+                      `0% downloaded. (0 of ${contentLength})`,
+                    );
+                    break;
+                  case "Progress":
+                    downloaded += event.data.chunkLength;
+                    setUpdaterDescription(
+                      `${(downloaded / contentLength) * 100}% downloaded. (${downloaded} of ${contentLength})`,
+                    );
+                    break;
+                  case "Finished":
+                    break;
+                }
+              })
+              .then()
+              .catch((e) => {
+                throw e;
+              });
+            setUpdaterStatus("Restarting...");
+            setUpdaterDescription(
+              "The update was successfully installed. The app will now restart.",
+            );
+          }
+        })
+        .catch((e) => {
+          throw e;
+        });
+    }
+
     return (
       config && (
         <Section
@@ -183,13 +237,9 @@ export default function Settings() {
   return (
     <Layout title="Settings">
       {displayUpdater && (
-        <ConfirmUpdateDialog
-          onRequest={() => {
-            setUpdateButtonDisabled(true);
-            setUpdateButtonLabel("Requested");
-          }}
-          closeModel={() => setDisplayUpdater(false)}
-        />
+        <Dialog title={updaterStatus} content={updaterDescription}>
+          <></>
+        </Dialog>
       )}
       {displayResetDialog && (
         <Dialog
