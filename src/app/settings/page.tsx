@@ -15,6 +15,7 @@ import useKeyPress from "@/components/useKeyPress";
 import { useRouter } from "next/navigation";
 import Layout from "@/components/Layout";
 import { check } from "@tauri-apps/plugin-updater";
+import { relaunch } from "@tauri-apps/plugin-process";
 
 type RowProps = {
   children: ReactElement;
@@ -122,6 +123,7 @@ export default function Settings() {
                 setUpdaterDescription(
                   "The update was successfully installed. The app will now restart.",
                 );
+                relaunch().then();
               })
               .catch((e) => {
                 throw e;
